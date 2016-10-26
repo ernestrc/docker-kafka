@@ -1,0 +1,14 @@
+zookeeper:
+  container_name: zookeeper
+  image: jplock/zookeeper:3.4.6
+  net: kafka
+  ports:
+    - "2181:2181"
+kafka:
+  container_name: kafka
+  build: .
+  net: kafka
+  environment:
+    ZOOKEEPER_IP: zookeeper
+  ports:
+    - "9092:9092"

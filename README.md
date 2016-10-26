@@ -28,23 +28,15 @@ using the container as a client to run the basic producer and consumer example
 from [the Kafka Quick Start]:
 
 ```
-$ docker run -d --name zookeeper jplock/zookeeper:3.4.6
-$ docker run -d --name kafka --link zookeeper:zookeeper ches/kafka
+docker-compose up -d
 
-$ ZK_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' zookeeper)
-$ KAFKA_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' kafka)
-
-$ docker run --rm ches/kafka \
->   kafka-topics.sh --create --topic test --replication-factor 1 --partitions 1 --zookeeper $ZK_IP:2181
-Created topic "test".
+docker run --net kafka --rm ches/kafka kafka-topics.sh --create --topic test --replication-factor 1 --partitions 1 --zookeeper zookeeper:2181
 
 # In separate terminals:
-$ docker run --rm --interactive ches/kafka \
->   kafka-console-producer.sh --topic test --broker-list $KAFKA_IP:9092
+docker run --rm -ti ches/kafka kafka-console-producer.sh --topic test --broker-list kafka:9092
 <type some messages followed by newline>
 
-$ docker run --rm ches/kafka \
->   kafka-console-consumer.sh --topic test --from-beginning --zookeeper $ZK_IP:2181
+docker run --net kafka --rm ches/kafka kafka-console-consumer.sh --topic test --from-beginning --zookeeper zookeeper:2181
 ```
 
 ### Volumes
@@ -69,27 +61,6 @@ as shown in the above example, **ensuring** that you link using an alias of
 
 Alternatively, you may configure a specific address for Kafka to find ZK. See
 the Configuration section below.
-
-### A more complex local development setup
-
-This example shows more configuration options and assumes that you wish to run a
-development environment with Kafka ports mapped directly to localhost, for
-instance if you're writing a producer or consumer and want to avoid rebuilding a
-container for it to run in as you iterate. This requires that localhost is your
-Docker host, i.e. your workstation runs Linux. If you're using something like
-boot2docker, substitute the value of `boot2docker ip` below.
-
-```bash
-$ mkdir -p kafka-ex/{data,logs} && cd kafka-ex
-$ docker run -d --name zookeeper --publish 2181:2181 jplock/zookeeper:3.4.6
-$ docker run -d \
-    --hostname localhost \
-    --name kafka \
-    --volume ./data:/data --volume ./logs:/logs \
-    --publish 9092:9092 --publish 7203:7203 \
-    --env KAFKA_ADVERTISED_HOST_NAME=127.0.0.1 --env ZOOKEEPER_IP=127.0.0.1 \
-    ches/kafka
-```
 
 Configuration
 -------------
@@ -208,4 +179,3 @@ project's changelog file describes these in detail.
 [on the Docker registry]: https://registry.hub.docker.com/u/ches/kafka/
 [relateiq/kafka]: https://github.com/relateiq/docker-kafka
 [the Kafka Quick Start]: http://kafka.apache.org/documentation.html#quickstart
-
