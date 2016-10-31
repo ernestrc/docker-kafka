@@ -33,7 +33,7 @@ docker-compose up -d
 docker run --net kafka --rm ches/kafka kafka-topics.sh --create --topic test --replication-factor 1 --partitions 1 --zookeeper zookeeper:2181
 
 # In separate terminals:
-docker run --rm -ti ches/kafka kafka-console-producer.sh --topic test --broker-list kafka:9092
+docker run --net kafka --rm -ti ches/kafka kafka-console-producer.sh --topic test --broker-list kafka:9092
 <type some messages followed by newline>
 
 docker run --net kafka --rm ches/kafka kafka-console-consumer.sh --topic test --from-beginning --zookeeper zookeeper:2181
